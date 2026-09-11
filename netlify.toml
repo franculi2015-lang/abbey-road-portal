@@ -1,0 +1,59 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build.environment]
+  NODE_VERSION = "20.19.4"
+
+[[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/public-config"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/setup-status"
+  to = "/.netlify/functions/setup-status"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/register"
+  to = "/.netlify/functions/register-user"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin-user"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/account"
+  to = "/.netlify/functions/account"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

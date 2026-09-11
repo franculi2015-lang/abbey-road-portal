@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" role="img" aria-labelledby="title description">
+  <title id="title">Submarino amarillo educativo</title>
+  <desc id="description">Ilustración original de un submarino amarillo con cuatro estudiantes músicos navegando entre burbujas.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe46a"/>
+      <stop offset="1" stop-color="#f7b900"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d9fbff"/>
+      <stop offset="1" stop-color="#52b9db"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-40%" width="160%" height="190%">
+      <feDropShadow dx="0" dy="18" stdDeviation="13" flood-color="#02152e" flood-opacity=".27"/>
+    </filter>
+  </defs>
+
+  <g fill="none" stroke="#bceffa" stroke-width="7" opacity=".65">
+    <circle cx="95" cy="113" r="18"/><circle cx="139" cy="63" r="10"/>
+    <circle cx="784" cy="88" r="25"/><circle cx="833" cy="43" r="10"/>
+    <circle cx="755" cy="384" r="14"/><circle cx="805" cy="337" r="8"/>
+  </g>
+
+  <g filter="url(#shadow)" stroke="#071f45" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M142 223c56-83 153-124 298-124h185c97 0 168 56 168 132v30c0 94-93 154-236 154H352c-128 0-225-48-258-129-14-34 6-54 48-63Z" fill="url(#body)" stroke-width="11"/>
+    <path d="M120 235 48 184v160l93-53" fill="#ff6b5f" stroke-width="11"/>
+    <path d="M652 139c55 0 89 21 116 56l46-17 8 73-31 8" fill="#ffcc20" stroke-width="11"/>
+    <path d="M401 100c8-54 37-80 93-80h69v80" fill="#ffcc20" stroke-width="11"/>
+    <path d="M492 21v-5h70v85" stroke-width="11"/>
+    <path d="M526 16V2h59" stroke-width="11"/>
+    <path d="M579 2v33" stroke-width="11"/>
+    <path d="M236 392c24 47 57 71 101 71h62v-48M575 414v49h74c41 0 68-21 84-62" fill="#ffcc20" stroke-width="11"/>
+
+    <g fill="url(#glass)" stroke-width="9">
+      <circle cx="279" cy="221" r="70"/>
+      <circle cx="445" cy="205" r="70"/>
+      <circle cx="611" cy="221" r="70"/>
+    </g>
+
+    <g stroke-width="6">
+      <circle cx="255" cy="204" r="19" fill="#f2b18f"/>
+      <path d="M236 203c2-25 37-32 43-4-14-10-30-8-43 4Z" fill="#173c6a"/>
+      <path d="m250 231-13 34m19-28 23 25m-45-5 51 2"/>
+      <path d="M268 236c18 3 29 12 33 26" stroke="#ff6b5f"/>
+
+      <circle cx="397" cy="192" r="18" fill="#d98d66"/>
+      <path d="M379 193c-5-31 34-34 39-7-13-8-26-6-39 7Z" fill="#111827"/>
+      <path d="m395 219-12 34m16-32 21 29"/>
+      <path d="m376 243 51-18m-45 12 42 12" stroke="#ff6b5f"/>
+
+      <circle cx="471" cy="189" r="18" fill="#f0bb90"/>
+      <path d="M453 188c3-24 33-29 39-2-14-7-28-4-39 2Z" fill="#b65d2b"/>
+      <path d="m468 216-9 37m13-34 20 29"/>
+      <path d="M450 237h48m-43-7 5 18m33-18-4 18" stroke="#42c7c7"/>
+
+      <circle cx="611" cy="205" r="19" fill="#8d5c45"/>
+      <path d="M590 205c-2-28 40-36 44-3-15-11-30-9-44 3Z" fill="#071f45"/>
+      <path d="m607 233-9 33m15-31 22 27"/>
+      <path d="m589 255 53-12m-43-8 32 30" stroke="#ff6b5f"/>
+    </g>
+
+    <path d="M183 326c128 54 337 73 539-5" stroke="#f29e00" stroke-width="8" opacity=".72"/>
+    <circle cx="184" cy="273" r="13" fill="#071f45" stroke-width="5"/>
+    <path d="M710 274h31" stroke-width="11"/>
+  </g>
+
+  <g fill="#ff6b5f" stroke="#071f45" stroke-width="5" stroke-linejoin="round">
+    <path d="M822 152v-53l35 9-1 16-20-5v39c0 17-28 20-31 4-2-11 7-17 17-10Z"/>
+    <path d="M120 116V68l29 9v15l-17-5v35c0 15-25 18-28 4-2-10 6-16 16-10Z"/>
+  </g>
+</svg>
