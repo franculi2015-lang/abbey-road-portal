@@ -56,7 +56,7 @@ export default async (request) => {
     user_metadata: { username, full_name: fullName },
   });
   if (error || !data.user) {
-    return json({ code: "create_failed", error: readableAdminError(error) }, 400);
+    return json({ code: "create_failed", error: error?.message || "No pudimos crear la cuenta." }, 400);
   }
 
   const { error: profileError } = await admin.from("profiles").upsert({
