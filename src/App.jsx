@@ -303,10 +303,11 @@ function SupervisorPanel({ users, session, profile, refresh, notify }) {
   async function createUser(event) {
     event.preventDefault();
     setCreating(true);
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       await adminRequest({ action: "create", username: form.get("username"), fullName: form.get("full_name"), password: form.get("password") });
-      event.currentTarget.reset();
+      formElement.reset();
       notify("Cuenta creada como alumno/a.", "success");
       await refresh();
     } catch (error) {
@@ -370,7 +371,8 @@ function MaterialsPanel({ profile, groups, materials, refresh, notify }) {
   const canTeach = profile.role !== "alumno";
   async function createMaterial(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       const url = String(form.get("resource_url") || "").trim();
       const { error } = await supabase.from("materials").insert({
@@ -379,7 +381,7 @@ function MaterialsPanel({ profile, groups, materials, refresh, notify }) {
         resource_url: url || null,
       });
       if (error) throw error;
-      event.currentTarget.reset();
+      formElement.reset();
       notify("Material publicado.", "success");
       await refresh();
     } catch (error) { notify(safeMessage(error), "error"); }
@@ -429,7 +431,8 @@ function GradesPanel({ profile, groups, users, members, grades, refresh, notify 
 
   async function createGrade(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       const { error } = await supabase.from("grades").insert({
         group_id: form.get("group_id"), student_id: form.get("student_id"), teacher_id: profile.id,
@@ -437,7 +440,7 @@ function GradesPanel({ profile, groups, users, members, grades, refresh, notify 
         max_score: Number(form.get("max_score")), feedback: String(form.get("feedback") || "").trim(),
       });
       if (error) throw error;
-      event.currentTarget.reset();
+      formElement.reset();
       notify("Calificación guardada.", "success");
       await refresh();
     } catch (error) { notify(safeMessage(error), "error"); }
@@ -502,7 +505,8 @@ function GroupsPanel({ profile, groups, users, members, refresh, notify }) {
 
   async function createGroup(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       const teacherId = profile.role === "supervisor" ? form.get("teacher_id") || profile.id : profile.id;
       const { data: group, error } = await supabase.from("groups").insert({ name: String(form.get("name") || "").trim(), description: String(form.get("description") || "").trim(), teacher_id: teacherId }).select().single();
@@ -512,7 +516,7 @@ function GroupsPanel({ profile, groups, users, members, refresh, notify }) {
         const { error: membersError } = await supabase.from("group_members").insert(studentIds.map((id) => ({ group_id: group.id, user_id: id })));
         if (membersError) throw membersError;
       }
-      event.currentTarget.reset();
+      formElement.reset();
       notify("Grupo creado.", "success");
       await refresh();
       setSelectedGroup(group.id);
@@ -521,11 +525,12 @@ function GroupsPanel({ profile, groups, users, members, refresh, notify }) {
 
   async function sendMessage(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const body = String(form.get("body") || "").trim();
     if (!body || !selectedGroup) return;
     const { error } = await supabase.from("messages").insert({ group_id: selectedGroup, sender_id: profile.id, body });
-    if (error) notify(safeMessage(error), "error"); else event.currentTarget.reset();
+    if (error) notify(safeMessage(error), "error"); else formElement.reset();
   }
 
   async function deleteGroup() {
@@ -622,7 +627,8 @@ function ChangePassword({ notify, session, force = false }) {
 
   async function submit(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const password = String(form.get("new_password") || "");
     const confirmation = String(form.get("confirm_password") || "");
 
@@ -651,7 +657,7 @@ function ChangePassword({ notify, session, force = false }) {
     } catch {
       // La contraseña ya fue actualizada en Supabase. El aviso se reintentará después.
     }
-    event.currentTarget.reset();
+    formElement.reset();
     setOpen(false);
     notify("Tu contraseña fue actualizada.", "success");
   }
