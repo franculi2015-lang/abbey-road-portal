@@ -2,6 +2,17 @@ import { createClient } from "@supabase/supabase-js";
 
 export const USER_DOMAIN = "portal.abbeyroad.local";
 
+class ServerOnlyWebSocket {
+  constructor() {
+    throw new Error("Realtime is disabled in server functions.");
+  }
+}
+
+const serverClientOptions = {
+  auth: { autoRefreshToken: false, persistSession: false },
+  realtime: { transport: ServerOnlyWebSocket },
+};
+
 export function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -17,9 +28,13 @@ export function portalEnv() {
   return {
     url: String(process.env.SUPABASE_URL || "").trim(),
     publishableKey: String(
-      process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "",
+      process.env.SUPABASE_PUBLISHABLE_KEY ||
+        process.env.SUPABASE_ANON_KEY ||
+        "",
     ).trim(),
-    serviceKey: String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim(),
+    serviceKey: String(
+      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    ).trim(),
     initialSupervisorPassword: String(
       process.env.INITIAL_SUPERVISOR_PASSWORD || "",
     ),
@@ -67,15 +82,15 @@ export function validUuid(value) {
 }
 
 export function adminClient(env = portalEnv()) {
-  return createClient(env.url, env.serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  return createClient(env.url, env.serviceKey, serverClientOptions);
 }
 
 export function publicClient(env = portalEnv()) {
-  return createClient(env.url, env.publishableKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  return createClient(
+    env.url,
+    env.publishableKey,
+    serverClientOptions,
+  );
 }
 
 export async function requestBody(request) {
@@ -88,67 +103,158 @@ export async function requestBody(request) {
 
 export function bearerToken(request) {
   const authorization = request.headers.get("authorization") || "";
-  return authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  return authorization.startsWith("Bearer ")
+    ? authorization.slice(7).trim()
+    : "";
 }
 
-export async function authenticatedActor(request, { supervisorOnly = false } = {}) {
+export async function authenticatedActor(
+  request,
+  { supervisorOnly = false } = {},
+) {
   const env = portalEnv();
   const missing = missingCoreVariables(env);
+
   if (missing.length) {
-    return { error: json({ code: "missing_env", error: "Falta configurar el servidor del portal." }, 503) };
+    return {
+      error: json(
+        {
+          code: "missing_env",
+          error: "Falta configurar el servidor del portal.",
+        },
+        503,
+      ),
+    };
   }
 
   const token = bearerToken(request);
+
   if (!token) {
-    return { error: json({ code: "session_required", error: "Necesitás iniciar sesión." }, 401) };
+    return {
+      error: json(
+        {
+          code: "session_required",
+          error: "Necesitás iniciar sesión.",
+        },
+        401,
+      ),
+    };
   }
 
   const admin = adminClient(env);
-  const { data: authData, error: authError } = await admin.auth.getUser(token);
+  const { data: authData, error: authError } =
+    await admin.auth.getUser(token);
+
   if (authError || !authData.user) {
-    return { error: json({ code: "invalid_session", error: "La sesión venció. Ingresá nuevamente." }, 401) };
+    return {
+      error: json(
+        {
+          code: "invalid_session",
+          error: "La sesión venció. Ingresá nuevamente.",
+        },
+        401,
+      ),
+    };
   }
 
   const { data: actor, error: profileError } = await admin
     .from("profiles")
-    .select("id, username, full_name, role, active, must_change_password")
+    .select(
+      "id, username, full_name, role, active, must_change_password",
+    )
     .eq("id", authData.user.id)
     .maybeSingle();
 
   if (profileError || !actor) {
-    return { error: json({ code: "profile_missing", error: "No encontramos el perfil de esta cuenta." }, 403) };
-  }
-  if (!actor.active) {
-    return { error: json({ code: "account_inactive", error: "Esta cuenta está desactivada." }, 403) };
-  }
-  if (supervisorOnly && actor.role !== "supervisor") {
-    return { error: json({ code: "supervisor_required", error: "Solo el Supervisor puede realizar esta acción." }, 403) };
+    return {
+      error: json(
+        {
+          code: "profile_missing",
+          error: "No encontramos el perfil de esta cuenta.",
+        },
+        403,
+      ),
+    };
   }
 
-  return { admin, actor, authUser: authData.user, env };
+  if (!actor.active) {
+    return {
+      error: json(
+        {
+          code: "account_inactive",
+          error: "Esta cuenta está desactivada.",
+        },
+        403,
+      ),
+    };
+  }
+
+  if (supervisorOnly && actor.role !== "supervisor") {
+    return {
+      error: json(
+        {
+          code: "supervisor_required",
+          error: "Solo el Supervisor puede realizar esta acción.",
+        },
+        403,
+      ),
+    };
+  }
+
+  return {
+    admin,
+    actor,
+    authUser: authData.user,
+    env,
+  };
 }
 
-export function readableAdminError(error, fallback = "No pudimos completar la acción.") {
+export function readableAdminError(
+  error,
+  fallback = "No pudimos completar la acción.",
+) {
   const message = String(error?.message || "").toLowerCase();
-  if (message.includes("already") || message.includes("duplicate") || message.includes("registered")) {
+
+  if (
+    message.includes("already") ||
+    message.includes("duplicate") ||
+    message.includes("registered")
+  ) {
     return "Ese nombre de usuario ya está registrado.";
   }
+
   if (message.includes("password")) {
     return "La contraseña no cumple los requisitos de seguridad.";
   }
-  if (message.includes("profiles") || message.includes("relation")) {
+
+  if (
+    message.includes("profiles") ||
+    message.includes("relation")
+  ) {
     return "La base de datos todavía no está preparada. Ejecutá supabase/schema.sql.";
   }
+
   return fallback;
 }
 
 export async function findAuthUserByEmail(admin, email) {
   for (let page = 1; page <= 10; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 100 });
+    const { data, error } =
+      await admin.auth.admin.listUsers({
+        page,
+        perPage: 100,
+      });
+
     if (error) throw error;
-    const found = data.users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+
+    const found = data.users.find(
+      (user) =>
+        user.email?.toLowerCase() === email.toLowerCase(),
+    );
+
     if (found) return found;
     if (data.users.length < 100) return null;
   }
+
   return null;
 }
